@@ -1,3 +1,6 @@
+from math import ceil
+from time import time
+
 import subsetsum
 
 import cmath
@@ -85,6 +88,10 @@ def generate_z_collections(n, d, num_of_elements):
 
 
 def all_subsets(arr, n, res, elements_used_counts):
+    # we are interested in diameter not larger than 2, so there is no point to continue recursion if res exceeds 2
+    # TODO: create a global var for diameter and apply to whole code
+    if (res > 2):
+        return
     if (n == 0):
         # print(res)
         elements_used_counts.append(res)
@@ -100,82 +107,82 @@ def get_all_solutions(arr, target, n):
 
     elements_used_counts = []
     all_subsets(arr, target, 0, elements_used_counts)
-    all_subsets(arr, target + n - 1, 0, elements_used_counts)
-
-    print("result: ", elements_used_counts)
+    all_subsets(arr, target + n, 0, elements_used_counts)
 
     return elements_used_counts
 
 
 
 def verify_diameter(n, z_collection):
-    max_diameter = 0
+    has_diameter_two = False
+
     for target in range(1, n):
-
-        has_solution = subsetsum.has_solution(z_collection, target)
-        min_diameter = 999 # len(z_collection)
-        min_subset = []
-
-        # solutions = subsetsum.get_all_solutions(z_collection, target)
         solutions = get_all_solutions(z_collection, target, n)
 
-        # if not (any(solutions)):
-        #     print("WARN: Unable to construct required subset for target: ", target)
-        #     return False
-
-        diamater_two = 0
+        has_valid_diameter = False
         for solution_elem_count in solutions:
-            if solution_elem_count <= 2:
-                diamater_two += 1
+            if solution_elem_count == 2:
+                has_valid_diameter = True
+                has_diameter_two = True
+                break
 
-        if diamater_two == 0:
+            elif solution_elem_count <= 2:
+                has_valid_diameter = True
+
+        if not has_valid_diameter:
+            print(f"Invalid diameter for target: {target}\n")
             return False
 
-
-        # for solution in solutions:
-        #     # `solution` contains indices of elements in `z_collection`
-        #     subset = [z_collection[i] for i in solution]
-        #     if (min_diameter > len(subset)):
-        #         min_diameter = len(subset)
-        #         min_subset = subset
-        #
-        #         if (min_diameter > 2):
-        #             print("WARN: Diameter larger than 2")
-        #             return False
-        #
-        #     if (max_diameter < min_diameter):
-        #         max_diameter = min_diameter
-        #
-        #     print(f"Min diameter for {target} is {min_diameter} through {min_subset}")
-
-    # print(f"Max diam {max_diameter}")
-    # return max_diameter
-    return True
+    if has_diameter_two:
+        return True
+    else:
+        print(f"There is no diameter 2 in the graph!\n")
+        return False
 
 
 def main():
     n = int(input("Insert number of vertices: "))
+
+    start = time()
+
     num_of_elements = int(n / 2) + 1
 
-    d = calculate_quadratic_equation(1, 2, 2 - (2 * int(n)))[1].real
-    print(F"Calculated d is: {d}")
-    d = int(d)
-    d = d+1
-    # # find the closest existing valid number of vertices `n` for given depth `d`
-    # n = find_closest_n(n)
+    d_theoretical_max = calculate_quadratic_equation(1, 2, 2 - (2 * int(n)))[1].real
+    d = ceil(d_theoretical_max)
+    print(F"Calculated d is: {d_theoretical_max} rounded up to {d}")
 
-    # generate Z collection from `n` vertices
-    z_collections = generate_z_collections(n, d, num_of_elements)
+    verified_d = None
+    verified_z_collection = None
+    for current_d in range(int(n/2), d-1, -1):
+        print()
 
-    # verify if Z collection represents Cayley graph with depth of `d`
-    for z_collection in z_collections:
-        if (verify_diameter(n, z_collection)):
-            print("SUCCESS!")
-            print("Used z_collection: ", z_collection)
-            return
+        # generate Z collection from `n` vertices
+        z_collections = generate_z_collections(n, current_d, num_of_elements)
 
-    print("No result found :(")
+        # verify if Z collection represents Cayley graph with depth of `current_d`
+        found = False
+        for z_collection in z_collections:
+            if (verify_diameter(n, z_collection)):
+                found = True
+                verified_d = current_d
+                verified_z_collection = z_collection
+                break
 
+        if not found and len(z_collections):
+            break
+
+    if (verified_d is None):
+        print(f"No result found :(\nDid it in: {time() - start}\n\n")
+        return
+
+    print("SUCCESS!")
+    print(f"    Number of vertices: {n}")
+    print(f"    Theoretical max d value: {d_theoretical_max}")
+    print(f"    Verified valid d value: {verified_d}")
+    print(f"    Time: {time() - start} s")
+    print(f"    Used z_collection: {verified_z_collection}")
+    print("\n")
+    return
 
 if __name__ == "__main__":
     while True:
