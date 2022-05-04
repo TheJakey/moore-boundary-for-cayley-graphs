@@ -153,7 +153,7 @@ def main():
 
     verified_d = None
     verified_z_collection = None
-    for current_d in range(int(n/2), d-1, -1):
+    for current_d in range(num_of_elements, d-1, -1):
         print()
 
         # generate Z collection from `n` vertices
