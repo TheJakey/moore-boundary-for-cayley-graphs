@@ -1,8 +1,6 @@
 from math import ceil
 from time import time
 
-import subsetsum
-
 import cmath
 import itertools
 
@@ -18,24 +16,6 @@ def calculate_quadratic_equation(a, b, c):
     print('Quadratic equation solutions are {0} and {1}'.format(sol1, sol2))
 
     return sol1, sol2
-
-
-degree_max_n_table = {
-    3: 10,
-    4: 15,
-    5: 24,
-    6: 32,
-    7: 50
-}
-
-
-def find_closest_n(given_n):
-    for k in degree_max_n_table.keys():
-        if given_n < degree_max_n_table[k]:
-            if k == 3:
-                return k
-            else:
-                return k - 1
 
 
 def generate_inverse_elements(n, num_of_elements):
@@ -112,7 +92,6 @@ def get_all_solutions(arr, target, n):
     return elements_used_counts
 
 
-
 def verify_diameter(n, z_collection):
     has_diameter_two = False
 
@@ -183,6 +162,7 @@ def main():
     print(f"    Used z_collection: {verified_z_collection}")
     print("\n")
     return
+
 
 if __name__ == "__main__":
     while True:
